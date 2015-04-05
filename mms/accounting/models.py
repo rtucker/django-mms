@@ -26,16 +26,27 @@ class LedgerAccount(models.Model):
     gnucash_account = models.TextField()
     account_type = models.SmallIntegerField(choices=TYPE_CHOICES)
 
+    def __str__(self):
+        outstr = "%s account " % self.get_account_type_display()
+        if self.gnucash_account is not None and len(self.gnucash_account) > 0:
+            return outstr + self.gnucash_account
+        else:
+            return outstr + "%d" % self.pk
+
 class LedgerEntry(models.Model):
     """A financial transaction, implemented as a transfer between two
     LedgerAccounts.
     """
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
-    debit_account = models.ForeignKey(LedgerAccount, related_name="debit_transactions", limit_choices_to={'account_type__lt': 0})
-    credit_account = models.ForeignKey(LedgerAccount, related_name="credit_transactions", limit_choices_to={'account_type__gte': 0})
+    debit_account = models.ForeignKey(LedgerAccount, related_name="debit_transactions")
+    credit_account = models.ForeignKey(LedgerAccount, related_name="credit_transactions")
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     details = models.TextField()
+
+    def __str__(self):
+        return "Amount %.2f (debit acct %s, credit acct %s, description %s)" % (
+            self.amount, self.debit_account, self.credit_account, self.details)
 
 class PaymentMethod(models.Model):
     API_NONE = 0
@@ -54,3 +65,9 @@ class PaymentMethod(models.Model):
     api = models.PositiveSmallIntegerField(choices=API_CHOICES, default=API_NONE)
     revenue_account = models.ForeignKey(LedgerAccount, related_name="+", limit_choices_to={'account_type': LedgerAccount.TYPE_ASSET})
     fee_account = models.ForeignKey(LedgerAccount, related_name="+", limit_choices_to={'account_type': LedgerAccount.TYPE_EXPENSE})
+
+    def __str__(self):
+        if self.api is not None:
+            return "%s (via %s)" % (self.name, self.get_api_display_name())
+        else:
+            return "%s" % self.name
