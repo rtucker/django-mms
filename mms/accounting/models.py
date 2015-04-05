@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 class LedgerAccount(models.Model):
     """A particular account in the accounting ledger.
 
@@ -23,15 +21,17 @@ class LedgerAccount(models.Model):
         (TYPE_LIABILITY, 'Liability'),
         (TYPE_INCOME, 'Income'),
     )
-    gnucash_account = models.TextField()
+    gnucash_account = models.TextField(blank=True)
     account_type = models.SmallIntegerField(choices=TYPE_CHOICES)
 
     def __str__(self):
-        outstr = "%s account " % self.get_account_type_display()
         if self.gnucash_account is not None and len(self.gnucash_account) > 0:
-            return outstr + self.gnucash_account
+            return "%s account '%s'" % (self.get_account_type_display(), self.gnucash_account)
         else:
-            return outstr + "%d" % self.pk
+            try:
+                return "%s account for member %s" % (self.get_account_type_display(), self.member.name)
+            except models.fields.related.RelatedObjectDoesNotExist:
+                return "%s account %d" % (self.get_account_type_display(), self.pk)
 
 class LedgerEntry(models.Model):
     """A financial transaction, implemented as a transfer between two
@@ -56,7 +56,7 @@ class PaymentMethod(models.Model):
     API_CHOICES = (
         (API_NONE, 'None'),
         (API_STRIPEIO, 'Stripe'),
-        (API_STRIPEIO_BITCOIN, 'Stripe (Bitcoin)'),
+        (API_STRIPEIO_BITCOIN, 'Stripe Bitcoin'),
         (API_PAYPAL, 'PayPal'),
     )
     name = models.CharField(max_length=200)
@@ -64,10 +64,10 @@ class PaymentMethod(models.Model):
     is_automated = models.BooleanField()
     api = models.PositiveSmallIntegerField(choices=API_CHOICES, default=API_NONE)
     revenue_account = models.ForeignKey(LedgerAccount, related_name="+", limit_choices_to={'account_type': LedgerAccount.TYPE_ASSET})
-    fee_account = models.ForeignKey(LedgerAccount, related_name="+", limit_choices_to={'account_type': LedgerAccount.TYPE_EXPENSE})
+    fee_account = models.ForeignKey(LedgerAccount, related_name="+", limit_choices_to={'account_type': LedgerAccount.TYPE_EXPENSE}, blank=True, null=True)
 
     def __str__(self):
-        if self.api is not None:
-            return "%s (via %s)" % (self.name, self.get_api_display_name())
+        if self.api is not self.API_NONE:
+            return "%s (via %s)" % (self.name, self.get_api_display())
         else:
             return "%s" % self.name
