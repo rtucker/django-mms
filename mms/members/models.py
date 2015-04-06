@@ -24,18 +24,6 @@ class MembershipLevel(models.Model):
     def __str__(self):
         return "%s ($%.2f/%s)" % (self.name, self.cost, self.get_per_display())
 
-def add_n_months(original, months):
-    year = original.year
-    month = original.month
-
-    month += months
-
-    while month > 12:
-        year += 1
-        month -= 12
-
-    return original.replace(year=year, month=month)
-
 class Member(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
@@ -49,9 +37,22 @@ class Member(models.Model):
             return "%s (%s)" % (self.name, self.membership)
         return "%s" % self.name
 
+    @staticmethod
+    def add_n_months(original, months):
+        year = original.year
+        month = original.month
+
+        month += months
+
+        while month > 12:
+            year += 1
+            month -= 12
+
+        return original.replace(year=year, month=month)
+
     def get_next_bill_date(self):
         if self.membership is not None:
-            return add_n_months(self.last_billed, self.membership.per)
+            return self.add_n_months(self.last_billed, self.membership.per)
         else:
             return None
     next_bill_date = property(get_next_bill_date)
@@ -77,7 +78,7 @@ class Member(models.Model):
                     self.membership.name,
                     self.membership.get_per_display(),
                     self.next_bill_date,
-                    add_n_months(self.next_bill_date, self.membership.per)
+                    self.add_n_months(self.next_bill_date, self.membership.per)
                 ),
             )
             self.last_billed = self.next_bill_date
