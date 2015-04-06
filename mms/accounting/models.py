@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.utils import timezone
 
 from decimal import Decimal
@@ -68,6 +68,17 @@ class LedgerAccount(models.Model):
             return self.credits - self.debits
     account_balance = property(get_account_balance)
 
+    def get_account_transactions(self):
+        """serving suggestion:
+
+        for txn in acct.get_account_transactions():
+            print(txn.effective_date, txn.account_net(acct))
+        """
+        qq = Q(debit_account=self) | Q(credit_account=self)
+        txns = LedgerEntry.objects.filter(qq)
+        txns = txns.order_by('effective_date', 'created_date')
+        return txns
+
 
 class LedgerEntry(models.Model):
     """A financial transaction, implemented as a transfer between two
@@ -90,6 +101,14 @@ class LedgerEntry(models.Model):
     def __str__(self):
         return "Amount %.2f (debit '%s', credit '%s', description '%s')" % (
             self.amount, self.debit_account, self.credit_account, self.details)
+
+    def account_net(self, account):
+        amt = 0
+        if self.debit_account == account:
+            amt += self.amount
+        if self.credit_account == account:
+            amt -= self.amount
+        return amt
 
 
 class PaymentMethod(models.Model):
