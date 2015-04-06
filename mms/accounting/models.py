@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Sum
+from django.utils import timezone
 
 from decimal import Decimal
 
@@ -51,22 +52,31 @@ class LedgerAccount(models.Model):
     debits = property(get_debits)
 
     def get_balance(self):
+        return self.debits - self.credits
+    balance = property(get_balance)
+
+    def get_account_balance(self):
         if self.account_type < 0:
             return self.debits - self.credits
         else:
             return self.credits - self.debits
-    balance = property(get_balance)
+    account_balance = property(get_account_balance)
 
 class LedgerEntry(models.Model):
     """A financial transaction, implemented as a transfer between two
     LedgerAccounts.
     """
+    effective_date = models.DateField(default=timezone.now)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
     debit_account = models.ForeignKey(LedgerAccount, related_name="debit_transactions")
     credit_account = models.ForeignKey(LedgerAccount, related_name="credit_transactions")
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     details = models.TextField()
+
+    class Meta:
+        verbose_name = 'ledger entry'
+        verbose_name_plural = 'ledger entries'
 
     def __str__(self):
         return "Amount %.2f (debit acct %s, credit acct %s, description %s)" % (
