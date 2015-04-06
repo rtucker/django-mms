@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models import Sum
+
+from decimal import Decimal
 
 class LedgerAccount(models.Model):
     """A particular account in the accounting ledger.
@@ -32,6 +35,27 @@ class LedgerAccount(models.Model):
                 return "%s account for member %s" % (self.get_account_type_display(), self.member.name)
             except models.fields.related.RelatedObjectDoesNotExist:
                 return "%s account %d" % (self.get_account_type_display(), self.pk)
+
+    def get_credits(self):
+        the_sum = self.credit_transactions.all().aggregate(Sum('amount'))['amount__sum']
+        if the_sum is None:
+            the_sum = Decimal('0.00')
+        return the_sum
+    credits = property(get_credits)
+
+    def get_debits(self):
+        the_sum = self.debit_transactions.all().aggregate(Sum('amount'))['amount__sum']
+        if the_sum is None:
+            the_sum = Decimal('0.00')
+        return the_sum
+    debits = property(get_debits)
+
+    def get_balance(self):
+        if self.account_type < 0:
+            return self.debits - self.credits
+        else:
+            return self.credits - self.debits
+    balance = property(get_balance)
 
 class LedgerEntry(models.Model):
     """A financial transaction, implemented as a transfer between two

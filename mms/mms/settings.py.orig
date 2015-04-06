@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'accounting',
     'members',
+    'payments_stripe',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -102,3 +103,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# Stripe integration
+
+STRIPE_SECRET_KEY = "sk_test_BQokikJOvBiI2HlWgH4olfQ2"
+STRIPE_PUBLISHABLE_KEY = "pk_test_6pRNASCoBOKtIshFeQd4XMUh"
+DEFAULT_CURRENCY_CODE = "usd"
