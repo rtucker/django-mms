@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from decimal import Decimal
 
+
 class LedgerAccount(models.Model):
     """A particular account in the accounting ledger.
 
@@ -30,22 +31,27 @@ class LedgerAccount(models.Model):
 
     def __str__(self):
         if self.gnucash_account is not None and len(self.gnucash_account) > 0:
-            return "%s account '%s'" % (self.get_account_type_display(), self.gnucash_account)
+            return "%s account '%s'" % (self.get_account_type_display(),
+                                        self.gnucash_account)
         else:
             try:
-                return "%s account for member %s" % (self.get_account_type_display(), self.member.name)
+                return "%s account for member %s" % (
+                    self.get_account_type_display(), self.member.name)
             except models.fields.related.RelatedObjectDoesNotExist:
-                return "%s account %d" % (self.get_account_type_display(), self.pk)
+                return "%s account %d" % (self.get_account_type_display(),
+                                          self.pk)
 
     def get_credits(self):
-        the_sum = self.credit_transactions.all().aggregate(Sum('amount'))['amount__sum']
+        agg = self.credit_transactions.all().aggregate(Sum('amount'))
+        the_sum = agg['amount__sum']
         if the_sum is None:
             the_sum = Decimal('0.00')
         return the_sum
     credits = property(get_credits)
 
     def get_debits(self):
-        the_sum = self.debit_transactions.all().aggregate(Sum('amount'))['amount__sum']
+        agg = self.debit_transactions.all().aggregate(Sum('amount'))
+        the_sum = agg['amount__sum']
         if the_sum is None:
             the_sum = Decimal('0.00')
         return the_sum
@@ -62,6 +68,7 @@ class LedgerAccount(models.Model):
             return self.credits - self.debits
     account_balance = property(get_account_balance)
 
+
 class LedgerEntry(models.Model):
     """A financial transaction, implemented as a transfer between two
     LedgerAccounts.
@@ -69,8 +76,10 @@ class LedgerEntry(models.Model):
     effective_date = models.DateField(default=timezone.now)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
-    debit_account = models.ForeignKey(LedgerAccount, related_name="debit_transactions")
-    credit_account = models.ForeignKey(LedgerAccount, related_name="credit_transactions")
+    debit_account = models.ForeignKey(LedgerAccount,
+                                      related_name="debit_transactions")
+    credit_account = models.ForeignKey(LedgerAccount,
+                                       related_name="credit_transactions")
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     details = models.TextField()
 
@@ -79,8 +88,9 @@ class LedgerEntry(models.Model):
         verbose_name_plural = 'ledger entries'
 
     def __str__(self):
-        return "Amount %.2f (debit acct %s, credit acct %s, description %s)" % (
+        return "Amount %.2f (debit '%s', credit '%s', description '%s')" % (
             self.amount, self.debit_account, self.credit_account, self.details)
+
 
 class PaymentMethod(models.Model):
     API_NONE = 0
@@ -96,9 +106,15 @@ class PaymentMethod(models.Model):
     name = models.CharField(max_length=200)
     is_recurring = models.BooleanField()
     is_automated = models.BooleanField()
-    api = models.PositiveSmallIntegerField(choices=API_CHOICES, default=API_NONE)
-    revenue_account = models.ForeignKey(LedgerAccount, related_name="+", limit_choices_to={'account_type': LedgerAccount.TYPE_ASSET})
-    fee_account = models.ForeignKey(LedgerAccount, related_name="+", limit_choices_to={'account_type': LedgerAccount.TYPE_EXPENSE}, blank=True, null=True)
+    api = models.PositiveSmallIntegerField(choices=API_CHOICES,
+                                           default=API_NONE)
+    revenue_account = models.ForeignKey(
+        LedgerAccount, related_name="+",
+        limit_choices_to={'account_type': LedgerAccount.TYPE_ASSET})
+    fee_account = models.ForeignKey(
+        LedgerAccount, related_name="+",
+        limit_choices_to={'account_type': LedgerAccount.TYPE_EXPENSE},
+        blank=True, null=True)
 
     def __str__(self):
         if self.api is not self.API_NONE:

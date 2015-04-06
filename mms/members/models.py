@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from accounting.models import LedgerAccount, LedgerEntry
 
+
 class MembershipLevel(models.Model):
     PER_MONTH = 1
     PER_QUARTER = 3
@@ -14,21 +15,28 @@ class MembershipLevel(models.Model):
     )
     name = models.CharField(max_length=200)
     cost = models.DecimalField(max_digits=8, decimal_places=2)
-    per = models.PositiveSmallIntegerField(choices=PER_CHOICES, default=PER_MONTH)
+    per = models.PositiveSmallIntegerField(choices=PER_CHOICES,
+                                           default=PER_MONTH)
     has_keyfob = models.BooleanField()
     has_room_key = models.BooleanField()
     has_voting = models.BooleanField()
     has_powertool_access = models.BooleanField()
-    account = models.ForeignKey(LedgerAccount, limit_choices_to={'account_type': LedgerAccount.TYPE_INCOME})
+    account = models.ForeignKey(
+        LedgerAccount,
+        limit_choices_to={'account_type': LedgerAccount.TYPE_INCOME})
 
     def __str__(self):
         return "%s ($%.2f/%s)" % (self.name, self.cost, self.get_per_display())
+
 
 class Member(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
     created = models.DateTimeField(auto_now_add=True)
-    account = models.OneToOneField(LedgerAccount, limit_choices_to={'account_type': LedgerAccount.TYPE_LIABILITY}, blank=True, null=True)
+    account = models.OneToOneField(
+        LedgerAccount,
+        limit_choices_to={'account_type': LedgerAccount.TYPE_LIABILITY},
+        blank=True, null=True)
     membership = models.ForeignKey(MembershipLevel, blank=True, null=True)
     last_billed = models.DateField(default=timezone.now)
 
@@ -70,11 +78,11 @@ class Member(models.Model):
         txn = None
         if not self.billing_up_to_date:
             txn = LedgerEntry.objects.create(
-                effective_date = self.next_bill_date,
-                debit_account = self.account,
-                credit_account = self.membership.account,
-                amount = self.membership.cost,
-                details = "%s, 1 %s (%s to %s)" % (
+                effective_date=self.next_bill_date,
+                debit_account=self.account,
+                credit_account=self.membership.account,
+                amount=self.membership.cost,
+                details="%s, 1 %s (%s to %s)" % (
                     self.membership.name,
                     self.membership.get_per_display(),
                     self.next_bill_date,

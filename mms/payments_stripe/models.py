@@ -9,6 +9,7 @@ import stripe
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
 class CustomerManager(models.Manager):
     def create_customer(self, member):
         # TODO: error checking
@@ -21,6 +22,7 @@ class CustomerManager(models.Manager):
         cust = self.create(member=member, stripe_id=obj.id)
 
         return cust
+
 
 class Customer(models.Model):
     member = models.OneToOneField(Member)
@@ -41,7 +43,9 @@ class Customer(models.Model):
         has_more = True
         starting_after = None
         while has_more:
-            response = self.stripe_object.sources.all(object='card', starting_after=starting_after)
+            response = self.stripe_object.sources.all(
+                object='card',
+                starting_after=starting_after)
             has_more = response.has_more
             if len(response.data) > 0:
                 starting_after = response.data[-1:][0].id
@@ -70,29 +74,32 @@ class Customer(models.Model):
     def delete_card(self, card_id):
         return self.get_card(card_id).delete()
 
+
 class ChargeManager(models.Manager):
-    def create_charge(self, customer, amount, method, description, descriptor=None):
+    def create_charge(self, customer, amount, method, description,
+                      descriptor=None):
         """Expects amount in Decimal (3.50)"""
         obj = stripe.Charge.create(
-            amount = int(amount*100),
-            currency = settings.DEFAULT_CURRENCY_CODE,
-            customer = customer.stripe_id,
-            description = description,
-            statement_descriptor = descriptor,
+            amount=int(amount*100),
+            currency=settings.DEFAULT_CURRENCY_CODE,
+            customer=customer.stripe_id,
+            description=description,
+            statement_descriptor=descriptor,
         )
 
         chrg = self.create(
-            customer = customer,
-            payment_method = method,
-            stripe_id = obj.id,
-            amount = amount,
-            currency = settings.DEFAULT_CURRENCY_CODE,
-            state = Charge.STATE_SENT,
+            customer=customer,
+            payment_method=method,
+            stripe_id=obj.id,
+            amount=amount,
+            currency=settings.DEFAULT_CURRENCY_CODE,
+            state=Charge.STATE_SENT,
         )
 
         chrg.state_update()
 
         return chrg
+
 
 class Charge(models.Model):
     """A charge against a customer's card.
@@ -121,17 +128,22 @@ class Charge(models.Model):
     payment_method = models.ForeignKey(PaymentMethod)
     stripe_id = models.CharField(max_length=200)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
-    currency = models.CharField(max_length=3, default=settings.DEFAULT_CURRENCY_CODE)
-    state = models.PositiveSmallIntegerField(choices=STATE_CHOICES, default=STATE_INIT)
+    currency = models.CharField(max_length=3,
+                                default=settings.DEFAULT_CURRENCY_CODE)
+    state = models.PositiveSmallIntegerField(choices=STATE_CHOICES,
+                                             default=STATE_INIT)
     transaction = models.ManyToManyField(LedgerEntry)
 
     objects = ChargeManager()
 
     def __str__(self):
         if self.stripe_id is not None and len(self.stripe_id) > 0:
-            return "%.2f from %s (%s, %s)" % (self.amount, self.customer, self.stripe_id, self.get_state_display())
+            return "%.2f from %s (%s, %s)" % (
+                self.amount, self.customer, self.stripe_id,
+                self.get_state_display())
         else:
-            return "%.2f from %s (%s)" % (self.amount, self.customer, self.get_state_display())
+            return "%.2f from %s (%s)" % (self.amount, self.customer,
+                                          self.get_state_display())
 
     def get_stripe_object(self):
         return stripe.Charge.retrieve(self.stripe_id)
@@ -142,7 +154,9 @@ class Charge(models.Model):
         has_more = True
         starting_after = None
         while has_more:
-            response = stripe.BalanceTransaction.all(source=self.stripe_id, starting_after=starting_after)
+            response = stripe.BalanceTransaction.all(
+                source=self.stripe_id,
+                starting_after=starting_after)
             has_more = response.has_more
             if len(response.data) > 0:
                 starting_after = response.data[-1:][0].id
@@ -153,9 +167,8 @@ class Charge(models.Model):
     def get_transaction_amounts(self):
         for bt in self.stripe_balance_transactions:
             yield {'amount': Decimal(bt.amount)/100,
-                    'fee':    Decimal(bt.fee)/100,
-                    'net':    Decimal(bt.net)/100,
-                   }
+                   'fee':    Decimal(bt.fee)/100,
+                   'net':    Decimal(bt.net)/100}
     transaction_amounts = property(get_transaction_amounts)
 
     def state_update(self):
@@ -173,19 +186,21 @@ class Charge(models.Model):
             for amts in self.transaction_amounts:
                 # Create ledger entry for full amount
                 le_gross = LedgerEntry.objects.create(
-                    debit_account = self.payment_method.revenue_account,
-                    credit_account = self.customer.member.account,
-                    amount = amts['amount'],
-                    details = '%s txn %s' % (self.payment_method, self.stripe_id),
+                    debit_account=self.payment_method.revenue_account,
+                    credit_account=self.customer.member.account,
+                    amount=amts['amount'],
+                    details='%s txn %s' % (self.payment_method,
+                                           self.stripe_id),
                 )
                 self.transaction.add(le_gross)
 
                 # Create ledger entry for fee amount
                 le_fee = LedgerEntry.objects.create(
-                    debit_account = self.payment_method.fee_account,
-                    credit_account = self.payment_method.revenue_account,
-                    amount = amts['fee'],
-                    details = '%s txn %s fees' % (self.payment_method, self.stripe_id),
+                    debit_account=self.payment_method.fee_account,
+                    credit_account=self.payment_method.revenue_account,
+                    amount=amts['fee'],
+                    details='%s txn %s fees' % (self.payment_method,
+                                                self.stripe_id),
                 )
                 self.transaction.add(le_fee)
 
