@@ -7,7 +7,8 @@ from accounting.models import PaymentMethod, LedgerEntry
 from decimal import Decimal
 import stripe
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", None)
+currency = getattr(settings, "DEFAULT_CURRENCY_CODE", None)
 
 
 class CustomerManager(models.Manager):
@@ -81,7 +82,7 @@ class ChargeManager(models.Manager):
         """Expects amount in Decimal (3.50)"""
         obj = stripe.Charge.create(
             amount=int(amount*100),
-            currency=settings.DEFAULT_CURRENCY_CODE,
+            currency=currency,
             customer=customer.stripe_id,
             description=description,
             statement_descriptor=descriptor,
@@ -92,7 +93,7 @@ class ChargeManager(models.Manager):
             payment_method=method,
             stripe_id=obj.id,
             amount=amount,
-            currency=settings.DEFAULT_CURRENCY_CODE,
+            currency=currency,
             state=Charge.STATE_SENT,
         )
 
@@ -129,7 +130,7 @@ class Charge(models.Model):
     stripe_id = models.CharField(max_length=200)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     currency = models.CharField(max_length=3,
-                                default=settings.DEFAULT_CURRENCY_CODE)
+                                default=currency)
     state = models.PositiveSmallIntegerField(choices=STATE_CHOICES,
                                              default=STATE_INIT)
     transaction = models.ManyToManyField(LedgerEntry)
