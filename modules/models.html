@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Accounting Core &mdash; mms 0.99.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.99.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="mms 0.99.1 documentation" href="../index.html" />
+    <link rel="prev" title="Welcome to mms’s documentation!" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to mms’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mms 0.99.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-accounting.models">
+<span id="accounting-core"></span><h1>Accounting Core<a class="headerlink" href="#module-accounting.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="accounting.models.LedgerAccount">
+<em class="property">class </em><code class="descclassname">accounting.models.</code><code class="descname">LedgerAccount</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.LedgerAccount" title="Permalink to this definition">¶</a></dt>
+<dd><p>A particular account in the accounting ledger.</p>
+<p>All transactions must have a left side (debit) and a right side (credit),
+and they must add up to zero.</p>
+<dl class="method">
+<dt id="accounting.models.LedgerAccount.get_account_transactions">
+<code class="descname">get_account_transactions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.LedgerAccount.get_account_transactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>serving suggestion:</p>
+<dl class="docutils">
+<dt>for txn in acct.get_account_transactions():</dt>
+<dd>print(txn.effective_date, txn.account_net(acct))</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="accounting.models.LedgerEntry">
+<em class="property">class </em><code class="descclassname">accounting.models.</code><code class="descname">LedgerEntry</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.LedgerEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>A financial transaction, implemented as a transfer between two
+LedgerAccounts.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="accounting.models.PaymentMethod">
+<em class="property">class </em><code class="descclassname">accounting.models.</code><code class="descname">PaymentMethod</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>is_recurring</em>, <em>is_automated</em>, <em>api</em>, <em>revenue_account</em>, <em>fee_account</em><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.PaymentMethod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-members.models">
+<span id="members-module"></span><h1>Members Module<a class="headerlink" href="#module-members.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="members.models.Member">
+<em class="property">class </em><code class="descclassname">members.models.</code><code class="descname">Member</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>email</em>, <em>created</em>, <em>account</em>, <em>membership</em>, <em>last_billed</em><span class="sig-paren">)</span><a class="headerlink" href="#members.models.Member" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="members.models.MembershipLevel">
+<em class="property">class </em><code class="descclassname">members.models.</code><code class="descname">MembershipLevel</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>cost</em>, <em>per</em>, <em>has_keyfob</em>, <em>has_room_key</em>, <em>has_voting</em>, <em>has_powertool_access</em>, <em>account</em><span class="sig-paren">)</span><a class="headerlink" href="#members.models.MembershipLevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-payments_stripe.models">
+<span id="payments-module-stripe"></span><h1>Payments Module: Stripe<a class="headerlink" href="#module-payments_stripe.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="payments_stripe.models.Charge">
+<em class="property">class </em><code class="descclassname">payments_stripe.models.</code><code class="descname">Charge</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#payments_stripe.models.Charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A charge against a customer&#8217;s card.</p>
+<dl class="docutils">
+<dt>Responsible for creating LedgerEntries for:</dt>
+<dd><ul class="first last simple">
+<li>Debit payment_method.fee_account for transaction fee</li>
+<li>Debit payment_method.revenue_account for remainder</li>
+<li>Credit customer.member.account for full amount</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="payments_stripe.models.Customer">
+<em class="property">class </em><code class="descclassname">payments_stripe.models.</code><code class="descname">Customer</code><span class="sig-paren">(</span><em>id</em>, <em>member</em>, <em>stripe_id</em><span class="sig-paren">)</span><a class="headerlink" href="#payments_stripe.models.Customer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Accounting Core</a></li>
+<li><a class="reference internal" href="#module-members.models">Members Module</a></li>
+<li><a class="reference internal" href="#module-payments_stripe.models">Payments Module: Stripe</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to mms&#8217;s documentation!</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/models.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Ryan S. Tucker and Interlock Rochester, Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/modules/models.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>
