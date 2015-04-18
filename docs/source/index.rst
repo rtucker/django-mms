@@ -6,11 +6,13 @@
 Welcome to mms's documentation!
 ===============================
 
-Contents:
+Models
+======
 
 .. toctree::
    :maxdepth: 2
 
+   modules/models
 
 
 Indices and tables
