@@ -196,6 +196,6 @@ pseudoxml:
 # instead of relying on a presumed mms-gh-pages directory
 github:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/../../../mms-gh-pages
-	(cd $(BUILDDIR)/../../../mms-gh-pages && git add . && git commit -m "Documentation update" && git push)
+	(cd $(BUILDDIR)/../../../mms-gh-pages && git add . && git commit -m "Automatic documentation update")
 	@echo
 	@echo "Upload finished"
