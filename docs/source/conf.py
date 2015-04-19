@@ -36,6 +36,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
+    'sphinx.ext.intersphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -289,3 +290,9 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+# Intersphinx
+intersphinx_mapping = {
+  'python': ('https://docs.python.org/3.4/', None),
+  'django': ('http://docs.djangoproject.com/en/1.8/', 'http://docs.djangoproject.com/en/1.8/_objects/'),
+}

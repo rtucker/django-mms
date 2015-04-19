@@ -5,6 +5,22 @@ from accounting.models import LedgerAccount, LedgerEntry
 
 
 class MembershipLevel(models.Model):
+    """Descriptor for membership costs and privileges.
+
+    :param name: Name of membership level.
+    :param cost: Cost of this membership level.
+    :param per: Billing interval for this level.
+    :param account:
+        :py:class:`LedgerAccount` for income from this membership level.
+        Must be TYPE_INCOME.
+
+    The following grant privileges to members subscribed to this plan:
+
+    :param has_keyfob: Does the user get 24x7 access via keyfob?
+    :param has_room_key: Does the member get access to a locked room?
+    :param has_voting: Does the member get a vote?
+    :param has_powertool_access: Can the member use power tools?
+    """
     PER_MONTH = 1
     PER_QUARTER = 3
     PER_YEAR = 12
@@ -30,6 +46,21 @@ class MembershipLevel(models.Model):
 
 
 class Member(models.Model):
+    """A member of our august institution.
+
+    :param name: Name of member.
+    :param email: E-mail address for member.
+    :param created:
+        :class:`django.db.models.DateTimeField` with creation time of this
+        entry.  Immutable.
+    :param account:
+        :py:class:`LedgerAccount` for member-specific balance.  Must be
+        TYPE_LIABILITY.
+    :param membership: :py:class:`MembershipLevel` for this member.
+    :param last_billed:
+        :class:`django.db.models.DateField` storing the last date this member
+        was billed.  Defaults to :func:`django.utils.timezone.now`.
+    """
     name = models.CharField(max_length=200)
     email = models.EmailField()
     created = models.DateTimeField(auto_now_add=True)
