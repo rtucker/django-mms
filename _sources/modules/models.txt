@@ -1,14 +1,14 @@
-Accounting Core
-===============
+accounting: Double-Entry Accounting Core
+========================================
 .. automodule:: accounting.models
     :members:
 
-Members Module
-==============
+members: Member Data Management
+===============================
 .. automodule:: members.models
     :members:
 
-Payments Module: Stripe
-=======================
+payments_stripe: Stripe Payments Module
+=======================================
 .. automodule:: payments_stripe.models
     :members:
