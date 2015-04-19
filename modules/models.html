@@ -1,0 +1,516 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>accounting: Double-Entry Accounting Core &mdash; mms 0.99.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.99.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="mms 0.99.1 documentation" href="../index.html" />
+    <link rel="prev" title="Welcome to the Interlock Member Management System documentation!" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to the Interlock Member Management System documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mms 0.99.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-accounting.models">
+<span id="accounting-double-entry-accounting-core"></span><h1>accounting: Double-Entry Accounting Core<a class="headerlink" href="#module-accounting.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="accounting.models.LedgerAccount">
+<em class="property">class </em><code class="descclassname">accounting.models.</code><code class="descname">LedgerAccount</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.LedgerAccount" title="Permalink to this definition">¶</a></dt>
+<dd><p>A particular account in the accounting ledger system.</p>
+<p>All transactions must have a left side (debit) and a right side (credit),
+and they must add up to zero.</p>
+<p>This implements the double-entry bookkeeping system.  More background
+information is available in the Wikipedia:</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Double-entry_bookkeeping_system">https://en.wikipedia.org/wiki/Double-entry_bookkeeping_system</a></p>
+<p>The normal balance for each account is determined by the
+<code class="xref py py-attr docutils literal"><span class="pre">account_type</span></code>, in particular whether the integer value
+is less than zero:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="44%" />
+<col width="20%" />
+<col width="36%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type</th>
+<th class="head">Int</th>
+<th class="head">Balance</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Expense</td>
+<td>-2</td>
+<td>debit</td>
+</tr>
+<tr class="row-odd"><td>Asset</td>
+<td>-1</td>
+<td>debit</td>
+</tr>
+<tr class="row-even"><td>Equity</td>
+<td>0</td>
+<td>credit</td>
+</tr>
+<tr class="row-odd"><td>Liability</td>
+<td>1</td>
+<td>credit</td>
+</tr>
+<tr class="row-even"><td>Income</td>
+<td>2</td>
+<td>credit</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gnucash_account</strong> &#8211; Corresponding Gnucash account.  Used for data exchange with the core
+accounting system.</li>
+<li><strong>account_type</strong> &#8211; Type of account, based on double-entry bookkeeping principles.  This
+is from <em>our</em> perspective: an account where a member deposits money
+would be a Liability account.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="accounting.models.LedgerAccount.account_balance">
+<code class="descname">account_balance</code><a class="headerlink" href="#accounting.models.LedgerAccount.account_balance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The balance of this account.</p>
+<p>Unlike <a class="reference internal" href="#accounting.models.LedgerAccount.balance" title="accounting.models.LedgerAccount.balance"><code class="xref py py-attr docutils literal"><span class="pre">balance</span></code></a>, this flips the sign for credit accounts
+(e.g. Equity, Liability, Income).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">account_type</span> <span class="ow">is</span> <span class="n">TYPE_LIABILITY</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">debits</span>
+<span class="go">Decimal(&#39;42.00&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">credits</span>
+<span class="go">Decimal(&#39;69.00&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">account_balance</span>
+<span class="go">Decimal(&#39;-27.00&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="accounting.models.LedgerAccount.balance">
+<code class="descname">balance</code><a class="headerlink" href="#accounting.models.LedgerAccount.balance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The raw balance of debits and credits on this account.  Simply
+put, this returns debits minus credits without any regard for the
+account&#8217;s normal balance.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">debits</span>
+<span class="go">Decimal(&#39;42.00&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">credits</span>
+<span class="go">Decimal(&#39;69.00&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">balance</span>
+<span class="go">Decimal(&#39;-27.00&#39;)</span>
+</pre></div>
+</div>
+<p>The summation of balance across all <a class="reference internal" href="#accounting.models.LedgerAccount" title="accounting.models.LedgerAccount"><code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code></a> will
+(should?) equal <em>exactly</em> zero.</p>
+<p>See also: <a class="reference internal" href="#accounting.models.LedgerAccount.account_balance" title="accounting.models.LedgerAccount.account_balance"><code class="xref py py-attr docutils literal"><span class="pre">account_balance</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="accounting.models.LedgerAccount.credits">
+<code class="descname">credits</code><a class="headerlink" href="#accounting.models.LedgerAccount.credits" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sum of all credit transactions on this account.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">credits</span>
+<span class="go">Decimal(&#39;42.00&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="accounting.models.LedgerAccount.debits">
+<code class="descname">debits</code><a class="headerlink" href="#accounting.models.LedgerAccount.debits" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sum of all debit transactions on this account.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">acct</span><span class="o">.</span><span class="n">debits</span>
+<span class="go">Decimal(&#39;23.23&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="accounting.models.LedgerAccount.get_account_transactions">
+<code class="descname">get_account_transactions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.LedgerAccount.get_account_transactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/models/querysets/#django.db.models.query.QuerySet" title="(in Django v1.8)"><code class="xref py py-class docutils literal"><span class="pre">django.db.models.query.QuerySet</span></code></a> with all
+<a class="reference internal" href="#accounting.models.LedgerEntry" title="accounting.models.LedgerEntry"><code class="xref py py-class docutils literal"><span class="pre">LedgerEntry</span></code></a> instances referencing this account, whether
+credit or debit.</p>
+<p>Example to print all effective dates and amounts:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">txn</span> <span class="ow">in</span> <span class="n">acct</span><span class="o">.</span><span class="n">get_account_transactions</span><span class="p">():</span>
+<span class="gp">... </span>   <span class="k">print</span><span class="p">(</span><span class="n">txn</span><span class="o">.</span><span class="n">effective_date</span><span class="p">,</span> <span class="n">txn</span><span class="o">.</span><span class="n">account_net</span><span class="p">(</span><span class="n">acct</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="accounting.models.LedgerEntry">
+<em class="property">class </em><code class="descclassname">accounting.models.</code><code class="descname">LedgerEntry</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.LedgerEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>A financial transaction, implemented as a transfer between two
+<a class="reference internal" href="#accounting.models.LedgerAccount" title="accounting.models.LedgerAccount"><code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code></a> instances.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>effective_date</strong> &#8211; <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/models/fields/#django.db.models.DateField" title="(in Django v1.8)"><code class="xref py py-class docutils literal"><span class="pre">django.db.models.DateField</span></code></a> containing the effective date of
+this transaction.  Defaults to <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/utils/#django.utils.timezone.now" title="(in Django v1.8)"><code class="xref py py-func docutils literal"><span class="pre">django.utils.timezone.now()</span></code></a>.</li>
+<li><strong>created_date</strong> &#8211; <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/models/fields/#django.db.models.DateTimeField" title="(in Django v1.8)"><code class="xref py py-class docutils literal"><span class="pre">django.db.models.DateTimeField</span></code></a> containing the time this
+instance was created.  Immutable.</li>
+<li><strong>modified_date</strong> &#8211; <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/models/fields/#django.db.models.DateTimeField" title="(in Django v1.8)"><code class="xref py py-class docutils literal"><span class="pre">django.db.models.DateTimeField</span></code></a> containing the time this
+instance was last modified.  Immutable.</li>
+<li><strong>debit_account</strong> &#8211; <a class="reference internal" href="#accounting.models.LedgerAccount" title="accounting.models.LedgerAccount"><code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code></a> for the <em>left side</em> of a transaction.</li>
+<li><strong>credit_account</strong> &#8211; <a class="reference internal" href="#accounting.models.LedgerAccount" title="accounting.models.LedgerAccount"><code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code></a> for the <em>right side</em> of a transaction.</li>
+<li><strong>amount</strong> &#8211; <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/models/fields/#django.db.models.DecimalField" title="(in Django v1.8)"><code class="xref py py-class docutils literal"><span class="pre">django.db.models.DecimalField</span></code></a> with the exact amount of this
+transaction.</li>
+<li><strong>details</strong> &#8211; <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/models/fields/#django.db.models.TextField" title="(in Django v1.8)"><code class="xref py py-class docutils literal"><span class="pre">django.db.models.TextField</span></code></a> free-form description for this
+transaction.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="accounting.models.LedgerEntry.account_net">
+<code class="descname">account_net</code><span class="sig-paren">(</span><em>account</em><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.LedgerEntry.account_net" title="Permalink to this definition">¶</a></dt>
+<dd><p>Net effect of this transaction on <em>account</em>.</p>
+<dl class="docutils">
+<dt>Equation:</dt>
+<dd><code class="xref py py-attr docutils literal"><span class="pre">amount</span></code> = debit - credit</dd>
+</dl>
+<p>This method returns <code class="xref py py-attr docutils literal"><span class="pre">amount</span></code> if <em>account</em> is the debit
+(left-hand) account and -<code class="xref py py-attr docutils literal"><span class="pre">amount</span></code> if <em>account</em> is the credit
+(right-hand) account.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>account</strong> &#8211; Account to compute net effect upon.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="accounting.models.PaymentMethod">
+<em class="property">class </em><code class="descclassname">accounting.models.</code><code class="descname">PaymentMethod</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#accounting.models.PaymentMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>A valid method of payment, for adding money to a member&#8217;s account.</p>
+<p>This provides a mapping between a payment processor&#8217;s API and two
+<a class="reference internal" href="#accounting.models.LedgerAccount" title="accounting.models.LedgerAccount"><code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code></a> instances, one for revenue and another for
+fees.</p>
+<dl class="docutils">
+<dt>Equation:</dt>
+<dd>revenue = payment - fees</dd>
+</dl>
+<p>where <em>payment</em> is the amount credited to the member&#8217;s account.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; User-friendly description of this payment method.</li>
+<li><strong>api</strong> &#8211; The API to use on the back end, selected from <code class="xref py py-attr docutils literal"><span class="pre">API_CHOICES</span></code></li>
+<li><strong>is_recurring</strong> &#8211; True if this method can be used for recurring payments (e.g. Stripe),
+False if it cannot (e.g. Cash).</li>
+<li><strong>is_automated</strong> &#8211; True if this method is completely automated from the end user&#8217;s
+perspective (e.g. Stripe), False if it requires intervention (e.g.
+Cheque).</li>
+<li><strong>revenue_account</strong> &#8211; <a class="reference internal" href="#accounting.models.LedgerAccount" title="accounting.models.LedgerAccount"><code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code></a> for the net transaction amount.  Must
+be TYPE_ASSET.</li>
+<li><strong>fee_account</strong> &#8211; <a class="reference internal" href="#accounting.models.LedgerAccount" title="accounting.models.LedgerAccount"><code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code></a> for the transaction fees.  Must be
+TYPE_EXPENSE.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-members.models">
+<span id="members-member-data-management"></span><h1>members: Member Data Management<a class="headerlink" href="#module-members.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="members.models.Member">
+<em class="property">class </em><code class="descclassname">members.models.</code><code class="descname">Member</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#members.models.Member" title="Permalink to this definition">¶</a></dt>
+<dd><p>A member of our august institution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; Name of member.</li>
+<li><strong>email</strong> &#8211; E-mail address for member.</li>
+<li><strong>created</strong> &#8211; <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/models/fields/#django.db.models.DateTimeField" title="(in Django v1.8)"><code class="xref py py-class docutils literal"><span class="pre">django.db.models.DateTimeField</span></code></a> with creation time of this
+entry.  Immutable.</li>
+<li><strong>account</strong> &#8211; <code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code> for member-specific balance.  Must be
+TYPE_LIABILITY.</li>
+<li><strong>membership</strong> &#8211; <a class="reference internal" href="#members.models.MembershipLevel" title="members.models.MembershipLevel"><code class="xref py py-class docutils literal"><span class="pre">MembershipLevel</span></code></a> for this member.</li>
+<li><strong>last_billed</strong> &#8211; <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/models/fields/#django.db.models.DateField" title="(in Django v1.8)"><code class="xref py py-class docutils literal"><span class="pre">django.db.models.DateField</span></code></a> storing the last date this member
+was billed.  Defaults to <a class="reference external" href="http://docs.djangoproject.com/en/1.8/ref/utils/#django.utils.timezone.now" title="(in Django v1.8)"><code class="xref py py-func docutils literal"><span class="pre">django.utils.timezone.now()</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="members.models.Member.add_n_months">
+<em class="property">static </em><code class="descname">add_n_months</code><span class="sig-paren">(</span><em>original</em>, <em>months</em><span class="sig-paren">)</span><a class="headerlink" href="#members.models.Member.add_n_months" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds (or subtracts) a number of <em>months</em> from the <em>original</em> date.</p>
+<p>Tries to get as close to &#8220;the nth of the month&#8221; as possible, but in
+the event that date doesn&#8217;t exist (e.g. February 30th), it will choose
+a close date.  For example, 1 month after January 31, 2015 will be
+February 28, 2015.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>original</strong> &#8211; <a class="reference external" href="https://docs.python.org/3.4/library/datetime.html#datetime.date" title="(in Python v3.4)"><code class="xref py py-class docutils literal"><span class="pre">datetime.date</span></code></a> or <a class="reference external" href="https://docs.python.org/3.4/library/datetime.html#datetime.datetime" title="(in Python v3.4)"><code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code></a> object with
+the original date to modify.</li>
+<li><strong>months</strong> &#8211; Number of months to add/subtract from the <em>original</em> date.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>original</em> with <em>months</em> added/subtracted accordingly.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="members.models.Member.balance">
+<code class="descname">balance</code><a class="headerlink" href="#members.models.Member.balance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the account balance for the member&#8217;s account.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None if there is no member account, or
+a decimal value, with positive as a credit owed to the member and
+negative as an amount due from the member (or is it the other way
+around?).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="members.models.Member.billing_up_to_date">
+<code class="descname">billing_up_to_date</code><a class="headerlink" href="#members.models.Member.billing_up_to_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the member&#8217;s billing is up-to-date, i.e. if their
+next billing date is in the future.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if their next bill date is in the future,
+False if it is <em>not</em> in the future,
+None if they do not have a next billing date.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="members.models.Member.do_regular_billing">
+<code class="descname">do_regular_billing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#members.models.Member.do_regular_billing" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the member&#8217;s billing is out of date (i.e. their next billing date
+is not in the future, this method creates a <code class="xref py py-class docutils literal"><span class="pre">LedgerEntry</span></code>
+object to effect the necessary transaction and moves the last-billed
+date forward.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">LedgerEntry</span></code> object if created,
+None otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="members.models.Member.next_bill_date">
+<code class="descname">next_bill_date</code><a class="headerlink" href="#members.models.Member.next_bill_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the next billing date for the member.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None if the user doesn&#8217;t have an active membership;
+<code class="xref py py-attr docutils literal"><span class="pre">last_billed</span></code> plus an appropriate offset if they do.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="members.models.MembershipLevel">
+<em class="property">class </em><code class="descclassname">members.models.</code><code class="descname">MembershipLevel</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#members.models.MembershipLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Descriptor for membership costs and privileges.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; Name of membership level.</li>
+<li><strong>cost</strong> &#8211; Cost of this membership level.</li>
+<li><strong>per</strong> &#8211; Billing interval for this level.</li>
+<li><strong>account</strong> &#8211; <code class="xref py py-class docutils literal"><span class="pre">LedgerAccount</span></code> for income from this membership level.
+Must be TYPE_INCOME.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The following grant privileges to members subscribed to this plan:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>has_keyfob</strong> &#8211; Does the user get 24x7 access via keyfob?</li>
+<li><strong>has_room_key</strong> &#8211; Does the member get access to a locked room?</li>
+<li><strong>has_voting</strong> &#8211; Does the member get a vote?</li>
+<li><strong>has_powertool_access</strong> &#8211; Can the member use power tools?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-payments_stripe.models">
+<span id="payments-stripe-stripe-payments-module"></span><h1>payments_stripe: Stripe Payments Module<a class="headerlink" href="#module-payments_stripe.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="payments_stripe.models.Charge">
+<em class="property">class </em><code class="descclassname">payments_stripe.models.</code><code class="descname">Charge</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#payments_stripe.models.Charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A charge against a customer&#8217;s card.</p>
+<dl class="docutils">
+<dt>Responsible for creating LedgerEntries for:</dt>
+<dd><ul class="first last simple">
+<li>Debit payment_method.fee_account for transaction fee</li>
+<li>Debit payment_method.revenue_account for remainder</li>
+<li>Credit customer.member.account for full amount</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="payments_stripe.models.Customer">
+<em class="property">class </em><code class="descclassname">payments_stripe.models.</code><code class="descname">Customer</code><span class="sig-paren">(</span><em>id</em>, <em>member</em>, <em>stripe_id</em><span class="sig-paren">)</span><a class="headerlink" href="#payments_stripe.models.Customer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">accounting: Double-Entry Accounting Core</a></li>
+<li><a class="reference internal" href="#module-members.models">members: Member Data Management</a></li>
+<li><a class="reference internal" href="#module-payments_stripe.models">payments_stripe: Stripe Payments Module</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to the Interlock Member Management System documentation!</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/models.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Ryan S. Tucker and Interlock Rochester, Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/modules/models.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>
