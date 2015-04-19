@@ -164,7 +164,7 @@ class Member(models.Model):
         # Debit account: member.account
         # Credit account: member.membership.account
         txn = None
-        if not self.billing_up_to_date:
+        if self.membership is not None and self.billing_up_to_date is False:
             txn = LedgerEntry.objects.create(
                 effective_date=self.next_bill_date,
                 debit_account=self.account,
@@ -187,8 +187,7 @@ class Member(models.Model):
         :return:
             None if there is no member account, or
             a decimal value, with positive as a credit owed to the member and
-            negative as an amount due from the member (or is it the other way
-            around?).
+            negative as an amount due from the member
         """
         if self.account is not None:
             return self.account.account_balance
