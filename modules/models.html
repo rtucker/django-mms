@@ -305,10 +305,93 @@ was billed.  Defaults to <a class="reference external" href="http://docs.djangop
 <dt id="members.models.Member.add_n_months">
 <em class="property">static </em><code class="descname">add_n_months</code><span class="sig-paren">(</span><em>original</em>, <em>months</em><span class="sig-paren">)</span><a class="headerlink" href="#members.models.Member.add_n_months" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds (or subtracts) a number of <em>months</em> from the <em>original</em> date.</p>
-<p>Tries to get as close to &#8220;the <a href="#id1"><span class="problematic" id="id2">*</span></a>n*th of the month&#8221; as possible, but in
+<p>Tries to get as close to &#8220;the nth of the month&#8221; as possible, but in
 the event that date doesn&#8217;t exist (e.g. February 30th), it will choose
 a close date.  For example, 1 month after January 31, 2015 will be
 February 28, 2015.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>original</strong> &#8211; <a class="reference external" href="https://docs.python.org/3.4/library/datetime.html#datetime.date" title="(in Python v3.4)"><code class="xref py py-class docutils literal"><span class="pre">datetime.date</span></code></a> or <a class="reference external" href="https://docs.python.org/3.4/library/datetime.html#datetime.datetime" title="(in Python v3.4)"><code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code></a> object with
+the original date to modify.</li>
+<li><strong>months</strong> &#8211; Number of months to add/subtract from the <em>original</em> date.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>original</em> with <em>months</em> added/subtracted accordingly.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="members.models.Member.balance">
+<code class="descname">balance</code><a class="headerlink" href="#members.models.Member.balance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the account balance for the member&#8217;s account.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None if there is no member account, or
+a decimal value, with positive as a credit owed to the member and
+negative as an amount due from the member (or is it the other way
+around?).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="members.models.Member.billing_up_to_date">
+<code class="descname">billing_up_to_date</code><a class="headerlink" href="#members.models.Member.billing_up_to_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the member&#8217;s billing is up-to-date, i.e. if their
+next billing date is in the future.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if their next bill date is in the future,
+False if it is <em>not</em> in the future,
+None if they do not have a next billing date.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="members.models.Member.do_regular_billing">
+<code class="descname">do_regular_billing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#members.models.Member.do_regular_billing" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the member&#8217;s billing is out of date (i.e. their next billing date
+is not in the future, this method creates a <code class="xref py py-class docutils literal"><span class="pre">LedgerEntry</span></code>
+object to effect the necessary transaction and moves the last-billed
+date forward.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">LedgerEntry</span></code> object if created,
+None otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="members.models.Member.next_bill_date">
+<code class="descname">next_bill_date</code><a class="headerlink" href="#members.models.Member.next_bill_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the next billing date for the member.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None if the user doesn&#8217;t have an active membership;
+<code class="xref py py-attr docutils literal"><span class="pre">last_billed</span></code> plus an appropriate offset if they do.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
