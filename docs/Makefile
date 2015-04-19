@@ -192,10 +192,16 @@ pseudoxml:
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
 
-# TODO: should clone repo to temp directory and do the magic there,
-# instead of relying on a presumed mms-gh-pages directory
 github:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/../../../mms-gh-pages
-	(cd $(BUILDDIR)/../../../mms-gh-pages && git add . && git commit -m "Automatic documentation update")
+	@echo "Creating temporary directory for documentation build..."
+	@tmpdir=`mktemp --tmpdir -d`; \
+	trap 'rm -rf "$$tmpdir"' EXIT; \
+	$(MAKE) tmpdir=$$tmpdir github-real
+
+github-real:
+	git clone --no-hardlinks --branch gh-pages $(BUILDDIR)/../.. $(tmpdir)/gh-pages
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(tmpdir)/gh-pages
+	(cd $(tmpdir)/gh-pages && git add . && git commit -m "Automatic documentation update")
+	(cd $(tmpdir)/gh-pages && git push)
 	@echo
 	@echo "Upload finished"
