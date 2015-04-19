@@ -47,16 +47,40 @@ class Member(models.Model):
 
     @staticmethod
     def add_n_months(original, months):
+        """Adds (or subtracts) a number of *months* from the *original* date.
+
+        Tries to get as close to "the *n*th of the month" as possible, but in
+        the event that date doesn't exist (e.g. February 30th), it will choose
+        a close date.  For example, 1 month after January 31, 2015 will be
+        February 28, 2015.
+        """
         year = original.year
         month = original.month
+        day = original.day
 
         month += months
 
-        while month > 12:
-            year += 1
-            month -= 12
+        while True:
+            while day < 1:
+                day += 31
+                month -= 1
 
-        return original.replace(year=year, month=month)
+            while month < 1:
+                year -= 1
+                month += 12
+
+            while month > 12:
+                year += 1
+                month -= 12
+
+            try:
+                new = original.replace(year=year, month=month, day=day)
+                break
+            except ValueError:
+                # day is most likely out of range (e.g. February 30)
+                day -= 1
+
+        return new
 
     def get_next_bill_date(self):
         if self.membership is not None:
