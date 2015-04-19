@@ -25,9 +25,9 @@ class MembershipLevel(models.Model):
     PER_QUARTER = 3
     PER_YEAR = 12
     PER_CHOICES = (
-        (PER_MONTH, 'month'),
-        (PER_QUARTER, 'quarter'),
-        (PER_YEAR, 'year'),
+        (PER_MONTH, '1 month'),
+        (PER_QUARTER, '1 quarter'),
+        (PER_YEAR, '1 year'),
     )
     name = models.CharField(max_length=200)
     cost = models.DecimalField(max_digits=8, decimal_places=2)
@@ -80,10 +80,18 @@ class Member(models.Model):
     def add_n_months(original, months):
         """Adds (or subtracts) a number of *months* from the *original* date.
 
-        Tries to get as close to "the *n*th of the month" as possible, but in
+        Tries to get as close to "the nth of the month" as possible, but in
         the event that date doesn't exist (e.g. February 30th), it will choose
         a close date.  For example, 1 month after January 31, 2015 will be
         February 28, 2015.
+
+        :param original:
+            :class:`datetime.date` or :class:`datetime.datetime` object with
+            the original date to modify.
+        :param months:
+            Number of months to add/subtract from the *original* date.
+
+        :return: *original* with *months* added/subtracted accordingly.
         """
         year = original.year
         month = original.month
@@ -113,21 +121,46 @@ class Member(models.Model):
 
         return new
 
-    def get_next_bill_date(self):
+    def _get_next_bill_date(self):
+        """Computes the next billing date for the member.
+
+        :return:
+            None if the user doesn't have an active membership;
+            :py:attr:`last_billed` plus an appropriate offset if they do.
+        """
+
         if self.membership is not None:
             return self.add_n_months(self.last_billed, self.membership.per)
         else:
             return None
-    next_bill_date = property(get_next_bill_date)
+    next_bill_date = property(_get_next_bill_date)
 
-    def get_billing_up_to_date(self):
+    def _get_billing_up_to_date(self):
+        """Determines if the member's billing is up-to-date, i.e. if their
+        next billing date is in the future.
+
+        :return:
+            True if their next bill date is in the future,
+            False if it is *not* in the future,
+            None if they do not have a next billing date.
+        """
+
         if self.next_bill_date is not None:
             return self.next_bill_date > timezone.now().date()
         else:
             return None
-    billing_up_to_date = property(get_billing_up_to_date)
+    billing_up_to_date = property(_get_billing_up_to_date)
 
     def do_regular_billing(self):
+        """If the member's billing is out of date (i.e. their next billing date
+        is not in the future, this method creates a :py:class:`LedgerEntry`
+        object to effect the necessary transaction and moves the last-billed
+        date forward.
+
+        :return:
+            :py:class:`LedgerEntry` object if created,
+            None otherwise.
+        """
         # Debit account: member.account
         # Credit account: member.membership.account
         txn = None
@@ -137,7 +170,7 @@ class Member(models.Model):
                 debit_account=self.account,
                 credit_account=self.membership.account,
                 amount=self.membership.cost,
-                details="%s, 1 %s (%s to %s)" % (
+                details="%s, %s (%s to %s)" % (
                     self.membership.name,
                     self.membership.get_per_display(),
                     self.next_bill_date,
@@ -148,9 +181,17 @@ class Member(models.Model):
             self.save()
         return txn
 
-    def get_balance(self):
+    def _get_balance(self):
+        """Retrieve the account balance for the member's account.
+
+        :return:
+            None if there is no member account, or
+            a decimal value, with positive as a credit owed to the member and
+            negative as an amount due from the member (or is it the other way
+            around?).
+        """
         if self.account is not None:
             return self.account.account_balance
         else:
             return None
-    balance = property(get_balance)
+    balance = property(_get_balance)
